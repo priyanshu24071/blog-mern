@@ -8,7 +8,7 @@ export default function PostDetail() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get('http://localhost:5001/api/posts', {
+    axios.get('call the api here', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     .then(res => {
@@ -22,9 +22,9 @@ export default function PostDetail() {
 
   return (
     <div className="card mb-4 shadow-sm">
-      {post.imagePath && (
-        <img
-          src={`http://localhost:5001/uploads/${post.imagePath}`}
+      {post.imagePath && 
+
+}`}
           className="card-img-top"
           alt={post.title}
         />
