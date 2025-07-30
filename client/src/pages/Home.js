@@ -9,8 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/api/posts`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      .get(`${API_BASE_URL}/api/posts`, {  headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
       .then(res => setPosts(res.data))
       .catch(console.error)
@@ -21,7 +20,7 @@ export default function Home() {
     await axios.delete(`${API_BASE_URL}/api/posts/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    setPosts(p => p.filter(x => x._id !== id))
+    setPosts(p => p.filter())
   }
 
   return (

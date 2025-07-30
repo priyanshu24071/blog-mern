@@ -75,6 +75,7 @@ export default function CreatePost() {
     if (image) {
       formData.append("image", image);
     }
+   
 
     try {
       const url = isEdit
