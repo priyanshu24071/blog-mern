@@ -36,6 +36,7 @@ export default function PostDetail() {
   if (!post) return <p>Loading…</p>;
 
   return (
+
     <div className="card mb-4 shadow-sm" style={{ maxWidth: 700, margin: '2rem auto', fontFamily: 'sans-serif' }}>
       {post.imagePath && (
         <img
