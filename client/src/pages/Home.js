@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function Home() {
@@ -13,16 +15,32 @@ export default function Home() {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
       .then(res => setPosts(res.data))
-      .catch(console.error)
+      .catch(err => {
+        if (err.response && err.response.status === 401) {
+          toast.error('Session expired. Please sign in again.');
+          window.location.href = '/signin';
+        } else {
+          toast.error('Failed to load posts.');
+        }
+      })
   }, [token])
 
   const handleDelete = async id => {
     if (!window.confirm('Delete this post?')) return
-    await axios.delete(`${API_BASE_URL}/api/posts/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    setPosts(prev => prev.filter(p => p._id !== id))
-
+    try {
+      await axios.delete(`${API_BASE_URL}/api/posts/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setPosts(prev => prev.filter(p => p._id !== id))
+      toast.success('Post deleted!');
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        toast.error('Session expired. Please sign in again.');
+        window.location.href = '/signin';
+      } else {
+        toast.error('Failed to delete post.');
+      }
+    }
   }
 
   return (

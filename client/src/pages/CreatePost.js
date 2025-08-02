@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -33,9 +35,13 @@ export default function CreatePost() {
 
   // Load post data (and existing image URL) when editing
   useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      toast.error('Session expired. Please sign in again.');
+      navigate('/signin');
+      return;
+    }
     if (!isEdit) return;
-
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     axios
       // Hit the single-post endpoint so we only fetch the one item
       .get(`${API_BASE_URL}/api/posts/${id}`, {
@@ -54,15 +60,24 @@ export default function CreatePost() {
         setExistingImageUrl(post.imageUrl);
       })
       .catch((err) => {
-        console.error("Failed to load post:", err);
-        alert("Could not load post data.");
+        if (err.response && err.response.status === 401) {
+          toast.error('Session expired. Please sign in again.');
+          navigate('/signin');
+        } else {
+          toast.error('Could not load post data.');
+        }
       });
-  }, [isEdit, id]);
+  }, [isEdit, id, navigate]);
 
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Session expired. Please sign in again.');
+      navigate('/signin');
+      return;
+    }
 
     // Build form data
     const formData = new FormData();
@@ -88,12 +103,16 @@ export default function CreatePost() {
           "Content-Type": "multipart/form-data",
         },
       });
-
+      toast.success(isEdit ? 'Post updated!' : 'Post created!');
       // On success, go back to home or posts list
       navigate("/");
     } catch (err) {
-      console.error("Submit error:", err);
-      alert(err?.response?.data?.error || "Submission failed");
+      if (err.response && err.response.status === 401) {
+        toast.error('Session expired. Please sign in again.');
+        navigate('/signin');
+      } else {
+        toast.error(err?.response?.data?.error || "Submission failed");
+      }
     }
   };
 

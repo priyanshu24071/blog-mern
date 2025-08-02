@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function Signin() {
@@ -15,9 +17,16 @@ export default function Signin() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('name', data.name);
       localStorage.setItem('email', data.email);
+      toast.success('Signed in successfully!');
       navigate('/');
     } catch (err) {
-      alert(err.response.data.error);
+      if (err.response && err.response.status === 401) {
+        toast.error('Invalid credentials. Please try again.');
+      } else if (err.response && err.response.status === 403) {
+        toast.error('Forbidden. You are not allowed to sign in.');
+      } else {
+        toast.error(err?.response?.data?.error || 'Failed to sign in.');
+      }
     }
   };
 

@@ -5,13 +5,17 @@ import Signup     from './pages/Signup';
 import Signin     from './pages/Signin';
 import Home       from './pages/Home';
 import CreatePost from './pages/CreatePost';
-import PostDetail from './pages/PostDetail';  // ← import this
+import PostDetail from './pages/PostDetail'; 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
       <div className="container mt-4">
+        <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
           <Route path="/"         element={<Home />} />
           <Route path="/signup"   element={<Signup />} />

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, Link } from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function PostDetail() {
@@ -16,7 +18,14 @@ export default function PostDetail() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
       .then((res) => setPost(res.data))
-      .catch(console.error);
+      .catch(err => {
+        if (err.response && err.response.status === 401) {
+          toast.error('Session expired. Please sign in again.');
+          window.location.href = '/signin';
+        } else {
+          toast.error('Failed to load post.');
+        }
+      });
   }, [id, token]);
   
   useEffect(() => {
@@ -42,8 +51,14 @@ export default function PostDetail() {
         likes: res.data.likes,
         likedBy: [...post.likedBy, userId],
       }));
+      toast.success('Post liked!');
     } catch (err) {
-      alert(err?.response?.data?.error || "Could not like post");
+      if (err.response && err.response.status === 401) {
+        toast.error('Session expired. Please sign in again.');
+        window.location.href = '/signin';
+      } else {
+        toast.error(err?.response?.data?.error || 'Could not like post');
+      }
     }
   };
 
@@ -52,18 +67,27 @@ export default function PostDetail() {
   const handleComment = async (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
-    await axios.post(
-      `${API_BASE_URL}/api/posts/${id}/comments`,
-      { text: comment },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setComment("");
-    // Refresh post to show new comment
-    const res = await axios.get(`${API_BASE_URL}/api/posts/${id}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    console.log(res);
-    setPost(res.data);
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/posts/${id}/comments`,
+        { text: comment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setComment("");
+      toast.success('Comment added!');
+      // Refresh post to show new comment
+      const res = await axios.get(`${API_BASE_URL}/api/posts/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      setPost(res.data);
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        toast.error('Session expired. Please sign in again.');
+        window.location.href = '/signin';
+      } else {
+        toast.error('Failed to add comment.');
+      }
+    }
   };
 
   if (!post) return <p>Loading…</p>;
