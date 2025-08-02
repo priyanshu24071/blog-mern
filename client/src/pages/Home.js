@@ -5,9 +5,20 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+function getUserIdFromToken(token) {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.id || payload._id || payload.userId;
+  } catch {
+    return null;
+  }
+}
+
 export default function Home() {
   const [posts, setPosts] = useState([])
   const token = localStorage.getItem('token')
+  const userId = getUserIdFromToken(token);
 
   useEffect(() => {
     axios
@@ -110,7 +121,7 @@ export default function Home() {
                 >
                   Read More
                 </Link>
-                {token && (
+                {token && p.author && p.author._id === userId && (
                   <>
                     <Link
                       to={`/edit/${p._id}`}
